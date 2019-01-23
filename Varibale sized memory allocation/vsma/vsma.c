@@ -1,4 +1,4 @@
-#include <stdlib.h> /* size_t */
+#include <stdlib.h> /* size_t, abs */
 #include <assert.h> /* assert */
 
 #include "vsma.h"
@@ -32,7 +32,7 @@ static block_header_t *CreateNewBlockHeader(block_header_t *current_header, size
 
 	new_block_header->block_size = original_block_size - (HEADER_SIZE + size);
 
-	#ifndef NDBUG
+	#ifndef NDEBUG
 		new_block_header->magic_number = MAGIC_NUMBER;
 	#endif
 
@@ -68,8 +68,8 @@ static void UpdateBlockHeader(block_header_t *block_header, size_t size)
 
 variable_allocator_t *VSMAInit(void *memory_ptr, size_t size)
 {
-	variable_allocator_t *allocator;
-	block_header_t *block_header;
+	variable_allocator_t *allocator = NULL;
+	block_header_t *block_header = NULL;
 
 	assert(NULL != memory_ptr);
 
@@ -84,7 +84,7 @@ variable_allocator_t *VSMAInit(void *memory_ptr, size_t size)
 	block_header = (block_header_t *)((char*)memory_ptr + ALLOCATOR_SIZE);
 	block_header->block_size = size - (ALLOCATOR_SIZE + HEADER_SIZE);
 
-	#ifndef NDBUG
+	#ifndef NDEBUG
 		block_header->magic_number = MAGIC_NUMBER;
 	#endif
 

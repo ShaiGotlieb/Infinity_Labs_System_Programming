@@ -5,8 +5,8 @@
  * This file contains the API of Variable Size Memory Allocator (VSMA)
  *
  *                                                				
- * Written by: 		OL62    								
- * Last updated : 	20.1.2019 
+ * Written by: 		Shai Gotlieb    								
+ * Last updated : 	23.1.2019 
  ***********************************************************************/
 
 typedef struct variable_allocator_s variable_allocator_t;
