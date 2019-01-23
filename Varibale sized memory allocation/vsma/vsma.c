@@ -17,7 +17,7 @@ struct variable_allocator_s
 
 typedef struct block_header 
 {
-	long signed int block_size;
+	long int block_size;
 	#ifndef NDEBUG
 		long magic_number;
 	#endif
@@ -63,9 +63,7 @@ static void UpdateBlockHeader(block_header_t *block_header, size_t size)
 {
 	block_header->block_size = -size;
 	
-	#ifndef NDBUG
-		block_header->magic_number = MAGIC_NUMBER;
-	#endif	
+	return;
 }
 
 variable_allocator_t *VSMAInit(void *memory_ptr, size_t size)
@@ -97,7 +95,8 @@ void *Defragmentation(variable_allocator_t *allocator, block_header_t *current_h
 {
 	block_header_t *next_header = NULL;
 
-	for (next_header = current_header; current_header->block_size < (long int)size && FALSE == IsLastHeader(allocator, current_header); current_header = next_header)
+	for (next_header = current_header; current_header->block_size < (long int)size && 
+			FALSE == IsLastHeader(allocator, current_header); current_header = next_header)
 	{
 		current_header = FindAvaiableBlock(allocator, current_header);
 
@@ -135,10 +134,12 @@ void *Defragmentation(variable_allocator_t *allocator, block_header_t *current_h
 
 size_t VSMAGetMaxFreeBlockSize(variable_allocator_t *allocator)
 {
+	block_header_t *block_header = NULL;
 	long int max = 0; 
-	block_header_t *block_header = (block_header_t *)(allocator + 1); 
 
 	assert(NULL != allocator);
+
+	block_header = START_HEADER;
 
 	Defragmentation(allocator, block_header, allocator->size); 
 	
@@ -167,24 +168,28 @@ void VSMAFree(void *block_ptr)
 	assert(block_to_free->magic_number == MAGIC_NUMBER);
 
 	UpdateBlockHeader(block_to_free, block_to_free->block_size);
+
+	return;
 }
 
 void *VSMAAlloc(variable_allocator_t *allocator, size_t size)
 {
 	block_header_t *block_header = NULL;
-
 	size_t original_block_size = 0;
-
-	assert(NULL != allocator);
-
-	block_header = START_HEADER;
 
 	if (0 == size)
 	{
 		return (NULL);
 	}
 
-	block_header = FindAvaiableBlock(allocator, block_header);
+	assert(NULL != allocator);
+
+	block_header = FindAvaiableBlock(allocator, START_HEADER);
+
+	if (block_header->block_size < 0)
+	{
+		return (NULL);
+	}
 
 	if ((long int)size > block_header->block_size)
 	{
